@@ -7,4 +7,37 @@ The only interesting file in this project is [/src/app/untilDestroy](src/app/unt
 It contains a [RxJs lettable operator](https://github.com/ReactiveX/rxjs/blob/master/doc/lettable-operators.md) that can bu used
 in an Angular project to unsubscribe your subscriptions at destroy.
 
-A sample on how to use it can be found int the hello component.
+```typescript
+import { untilDestroy } from './src/app/untilDestroy';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { timer } from 'rxjs/observable/timer';
+import { map, tap } from 'rxjs/operators';
+
+@Component({
+  selector: 'some-sample',
+  template: `
+    <h1>Hello Ondestroy Operator</h1>
+    <p>{{sample$|async | date:"HH:mm:ss"}}</p>
+    <p>{{sample1$|async | date:"HH:mm:ss"}}</p>
+
+  `,
+  styles: [`h1 { font-family: Lato; }`]
+})
+export class HelloComponent implements OnInit, OnDestroy {
+  completeOnDestroy = untilDestroy(this);
+
+  sample$ = timer(0, 500).pipe(this.completeOnDestroy, map(() => new Date()));
+  sample1$ = timer(0, 500).pipe(
+    // as an alternate use, you can do this:
+    untilDestroy(this),
+    map(() => new Date())
+  );
+
+  ngOnInit() {
+    this.sample$.subscribe();
+    this.sample1$.subscribe();
+  }
+
+  ngOnDestroy() {}
+}
+```

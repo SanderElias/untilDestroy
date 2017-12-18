@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import { timer } from 'rxjs/observable/timer';
 import { takeUntil, map, tap } from 'rxjs/operators';
@@ -26,7 +26,7 @@ const logIt = {
   `,
   styles: [`h1 { font-family: Lato; }`]
 })
-export class HelloComponent {
+export class HelloComponent implements OnInit, OnDestroy{
   // untilDestroy$ = untilDestroy(this)
   sample$ = timer(0, 500).pipe(
     untilDestroy(this),
