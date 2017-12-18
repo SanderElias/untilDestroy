@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 import { timer } from 'rxjs/observable/timer';
-import { takeUntil, map, tap } from 'rxjs/operators';
+import { takeUntil, map, tap, delay } from 'rxjs/operators';
 import { untilDestroy } from './untilDestroy';
 
 const logIt = {
@@ -26,16 +26,18 @@ const logIt = {
   `,
   styles: [`h1 { font-family: Lato; }`]
 })
-export class HelloComponent implements OnInit, OnDestroy{
-  // untilDestroy$ = untilDestroy(this)
-  sample$ = timer(0, 500).pipe(
-    untilDestroy(this),
+export class HelloComponent implements OnInit, OnDestroy {
+  takeUntilDestroy = untilDestroy(this);
+
+  sample$ = timer(0, 1000).pipe(
     map(() => new Date()),
+    this.takeUntilDestroy,
     tap(logIt)
   );
-  sample1$ = timer(0, 500).pipe(
-    untilDestroy(this),
+  sample1$ = timer(0, 1000).pipe(
     map(() => new Date()),
+    delay(1500),
+    this.takeUntilDestroy,
     tap(logIt)
   );
 
@@ -49,6 +51,5 @@ export class HelloComponent implements OnInit, OnDestroy{
 
   ngOnDestroy() {
     console.log('destroy');
-    // this.destroy$.next()
   }
 }

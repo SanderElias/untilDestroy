@@ -14,21 +14,25 @@ import { timer } from 'rxjs/observable/timer';
 import { map, tap } from 'rxjs/operators';
 
 @Component({
-  selector: 'some-sample',
+  selector: 'hello-sample',
   template: `
     <h1>Hello Ondestroy Operator</h1>
     <p>{{sample$|async | date:"HH:mm:ss"}}</p>
     <p>{{sample1$|async | date:"HH:mm:ss"}}</p>
-
-  `,
-  styles: [`h1 { font-family: Lato; }`]
+  `
 })
 export class HelloComponent implements OnInit, OnDestroy {
+  // assign the operator to a class property
   completeOnDestroy = untilDestroy(this);
 
-  sample$ = timer(0, 500).pipe(this.completeOnDestroy, map(() => new Date()));
+  sample$ = timer(0, 500).pipe(
+    // add it to your observables
+    this.completeOnDestroy,
+    map(() => new Date())
+  );
+
   sample1$ = timer(0, 500).pipe(
-    // as an alternate use, you can do this:
+    // as an alternate use, you can do this directly
     untilDestroy(this),
     map(() => new Date())
   );
