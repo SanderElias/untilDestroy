@@ -1,5 +1,9 @@
 import { Observable } from 'rxjs/Observable';
+import { takeUntil } from 'rxjs/operators';
 const isHookedUpAlready = Symbol('ComponentHasUntilDestroy');
+
+// create a symbol to extnd the class with an observable that fires on destroy!
+export const destroy$ = Symbol('destroy$');
 
 /**
  * an operator that takes until destroy it takes a components this a parameter
@@ -7,40 +11,38 @@ const isHookedUpAlready = Symbol('ComponentHasUntilDestroy');
  */
 export const untilDestroy = component => <T>(source: Observable<T>) =>
   new Observable<T>(observer => {
-    if (component[isHookedUpAlready] === undefined) {
+    if (component[destroy$] === undefined) {
       // only hookup each component once.
-      hookUp(component);
+      addDestroyObservableToComponent(component);
     }
-    // add the current observer to the list
-    component[isHookedUpAlready].push(observer);
 
-    // return a proxy. Aside from watching for destroy
-    // this operator does nothing.
-    return source.subscribe(observer);
+    // pipe in the takeuntil destroy% and proxy all other operators.
+    return source.pipe(takeUntil(component[destroy$])).subscribe(observer);
   });
 
-function hookUp(component) {
-  // create a list of observers to unsubscribe and stash it in the closure
-  const observerList = [];
-  // keep track of the original destroy function,
-  // the user might do something in there
-  const orignalDestroy = component.ngOnDestroy;
-  if (orignalDestroy === undefined) {
-    // Angular does not support dynamic added destroy methods
-    // so make sure there is one.
-    throw new Error(
-      'untilDestroy operator needs the component to have an ngOnDestroy method'
-    );
-  }
-  // replace the ngOndestroy
-  component.ngOnDestroy = () => {
-    // traverse all observers that are added and complete them
-    observerList.forEach(o => o.complete());
-    // destroy the list, so it won't cause a memory leak
-    component[isHookedUpAlready] = undefined;
-    // and at last, call the original destroy
-    orignalDestroy.call(component);
-  };
-  // Use a symbol to 'mark' the component it has an untilDestroy operator
-  component[isHookedUpAlready] = observerList;
+export function addDestroyObservableToComponent(component) {
+  component[destroy$] = new Observable<void>(observer => {
+    // keep track of the original destroy function,
+    // the user might do something in there
+    const orignalDestroy = component.ngOnDestroy;
+    if (orignalDestroy === undefined) {
+      // Angular does not support dynamic added destroy methods
+      // so make sure there is one.
+      throw new Error(
+        'untilDestroy operator needs the component to have an ngOnDestroy method'
+      );
+    }
+    // replace the ngOndestroy
+    component.ngOnDestroy = () => {
+      // fire off the destroy observable
+      observer.next();
+      // complete the observable
+      observer.complete();
+
+      // and at last, call the original destroy
+      orignalDestroy.call(component);
+    };
+    // return cleanup function.
+    return _ => (component[destroy$] = undefined);
+  });
 }
