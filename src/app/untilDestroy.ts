@@ -17,7 +17,7 @@ export const untilDestroy = component => <T>(source: Observable<T>) => {
   }
 
   // pipe in the takeuntil destroy$ and return the source unaltered
-  return source.pipe(takeUntil(component[destroy$])); // .subscribe(observer);
+  return source.pipe(takeUntil(component[destroy$]));
 };
 
 export function addDestroyObservableToComponent(component) {
