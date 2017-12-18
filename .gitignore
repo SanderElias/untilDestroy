@@ -41,3 +41,4 @@ testem.log
 Thumbs.db
 sampleUse.ts
 yarn-error.log
+/dist
