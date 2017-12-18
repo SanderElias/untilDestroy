@@ -26,7 +26,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "ghPages":
-      "ng build -bh /untilDestroy/ --prod -bo && git commit -a -m updateForGitHubPages && git subtree push --prefix dist origin gh-pages"
+      "ng build -bh /untilDestroy/ --prod && git commit -a -m updateForGitHubPages && git subtree push --prefix dist origin gh-pages"
   },
   "private": true,
   "devDependencies": {
