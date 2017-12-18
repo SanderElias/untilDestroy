@@ -1,6 +1,5 @@
 import { Observable } from 'rxjs/Observable';
 import { takeUntil } from 'rxjs/operators';
-const isHookedUpAlready = Symbol('ComponentHasUntilDestroy');
 
 // create a symbol to extnd the class with an observable that fires on destroy!
 export const destroy$ = Symbol('destroy$');
@@ -38,7 +37,6 @@ export function addDestroyObservableToComponent(component) {
       observer.next();
       // complete the observable
       observer.complete();
-
       // and at last, call the original destroy
       orignalDestroy.call(component);
     };
