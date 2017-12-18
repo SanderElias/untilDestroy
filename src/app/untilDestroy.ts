@@ -8,16 +8,15 @@ export const destroy$ = Symbol('destroy$');
  * an operator that takes until destroy it takes a components this a parameter
  * returns a lettable RxJS operator.
  */
-export const untilDestroy = component => <T>(source: Observable<T>) =>
-  new Observable<T>(observer => {
-    if (component[destroy$] === undefined) {
-      // only hookup each component once.
-      addDestroyObservableToComponent(component);
-    }
+export const untilDestroy = component => <T>(source: Observable<T>) => {
+  if (component[destroy$] === undefined) {
+    // only hookup each component once.
+    addDestroyObservableToComponent(component);
+  }
 
-    // pipe in the takeuntil destroy% and proxy all other operators.
-    return source.pipe(takeUntil(component[destroy$])).subscribe(observer);
-  });
+  // pipe in the takeuntil destroy$ and return the source unaltered
+  return source.pipe(takeUntil(component[destroy$])); // .subscribe(observer);
+};
 
 export function addDestroyObservableToComponent(component) {
   component[destroy$] = new Observable<void>(observer => {
