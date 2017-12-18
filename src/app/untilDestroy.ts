@@ -1,7 +1,9 @@
 import { Observable } from 'rxjs/Observable';
 import { takeUntil } from 'rxjs/operators';
 
-// create a symbol to extnd the class with an observable that fires on destroy!
+// create a symbol identify the observable I add to
+// the component so it doesn't conflict with anything.
+// I need this so I'm able to add the desired behaviour to the component.
 export const destroy$ = Symbol('destroy$');
 
 /**
